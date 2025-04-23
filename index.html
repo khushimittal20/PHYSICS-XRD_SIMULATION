@@ -10,63 +10,64 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: white;
+      background: linear-gradient(to bottom right, #1b1f29, #2e3a4f);
+      color: #e0e0e0;
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      padding: 2rem;
+      padding: 1rem;
     }
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
     }
     .sim-container {
       display: grid;
       grid-template-columns: 1fr 2fr;
-      gap: 2rem;
+      gap: 1rem;
       width: 100%;
-      max-width: 1200px;
-      margin-top: 2rem;
+      max-width: 1000px;
+      margin-top: 1rem;
     }
     .controls {
       background-color: rgba(255, 255, 255, 0.05);
-      padding: 2rem;
-      border-radius: 1.5rem;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
     }
     .controls h2 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      color: #f8f8f8;
+      margin-bottom: 0.75rem;
+      font-size: 1.25rem;
+      color: #f0f0f0;
     }
     .control-group {
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
     }
     label {
       display: block;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.3rem;
     }
     input, select {
       width: 100%;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
+      padding: 0.4rem;
+      border-radius: 0.4rem;
       border: none;
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
     .output-box {
-      margin-top: 2rem;
+      margin-top: 1rem;
       background-color: rgba(255, 255, 255, 0.08);
-      padding: 1rem;
-      border-radius: 1rem;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
       font-family: monospace;
+      font-size: 0.9rem;
     }
     canvas.diagram-canvas {
       width: 100%;
-      background-color: #111;
-      border-radius: 1.5rem;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+      background-color: #0c0c0c;
+      border-radius: 1rem;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
@@ -117,8 +118,8 @@
       </div>
     </div>
     <div>
-      <canvas id="diagram" class="diagram-canvas" height="300"></canvas>
-      <canvas id="graph" height="200"></canvas>
+      <canvas id="diagram" class="diagram-canvas" height="200"></canvas>
+      <canvas id="graph" height="160"></canvas>
     </div>
   </div>
 
@@ -144,8 +145,8 @@
         datasets: [{
           label: 'Intensity vs 2θ',
           data: [],
-          borderColor: '#00ffcc',
-          backgroundColor: 'rgba(0, 255, 204, 0.2)',
+          borderColor: '#ff66cc',
+          backgroundColor: 'rgba(255, 102, 204, 0.2)',
           tension: 0.3,
         }]
       },
@@ -187,34 +188,43 @@
         `Current d = ${d.toFixed(4)} Å\n` +
         `Lattice constant a = ${a.toFixed(4)} Å`;
 
-      drawDiagram(theta, satisfied);
+      drawDiagram(theta, satisfied, d);
       updateGraph(d, lambda, n);
     }
 
-    function drawDiagram(theta, showDiffraction) {
+    function drawDiagram(theta, showDiffraction, d) {
       ctx.clearRect(0, 0, diagram.width, diagram.height);
       const w = diagram.width;
       const h = diagram.height;
 
-      ctx.strokeStyle = '#888';
-      for (let y = 100; y < h; y += 40) {
+      const spacing = d * 40;
+
+      ctx.strokeStyle = '#777';
+      for (let y = 50; y < h - 30; y += spacing) {
         ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
+        ctx.moveTo(20, y);
+        ctx.lineTo(w - 20, y);
         ctx.stroke();
+
+        for (let x = 40; x < w - 40; x += 40) {
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = '#66ccff';
+          ctx.fill();
+        }
       }
 
       ctx.strokeStyle = '#ffcc00';
       ctx.beginPath();
-      ctx.moveTo(50, h / 2 - 100);
+      ctx.moveTo(40, h / 2 - 60);
       ctx.lineTo(w / 2, h / 2);
       ctx.stroke();
 
       if (showDiffraction) {
-        ctx.strokeStyle = '#00ffff';
+        ctx.strokeStyle = '#00ff99';
         ctx.beginPath();
         ctx.moveTo(w / 2, h / 2);
-        ctx.lineTo(w - 50, h / 2 - 100);
+        ctx.lineTo(w - 40, h / 2 - 60);
         ctx.stroke();
       }
     }
