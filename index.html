@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X-ray Diffraction (XRD) Simulation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .sim-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 2rem;
+    }
+    .controls {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    .controls h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #f8f8f8;
+    }
+    .control-group {
+      margin-bottom: 1.2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+    }
+    .output-box {
+      margin-top: 2rem;
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 1rem;
+      border-radius: 1rem;
+      font-family: monospace;
+    }
+    canvas.diagram-canvas {
+      width: 100%;
+      background-color: #111;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>X-ray Diffraction (XRD) Simulation</h1>
+  <div class="sim-container">
+    <div class="controls">
+      <h2>Interactive Parameters</h2>
+      <div class="control-group">
+        <label for="theta">θ (Theta in degrees)</label>
+        <input type="range" id="theta" min="5" max="90" step="0.1" value="30">
+        <span id="theta-val">30°</span>
+      </div>
+      <div class="control-group">
+        <label for="a">Lattice Constant (a in Å)</label>
+        <input type="number" id="a" step="0.01" value="3.5">
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="use-auto-d" checked> Use calculated d-spacing from (hkl, a)</label>
+      </div>
+      <div class="control-group">
+        <label for="d">Interplanar Spacing (d in Å)</label>
+        <input type="range" id="d" min="0.5" max="5" step="0.01" value="1.5">
+        <span id="d-val">1.5 Å</span>
+      </div>
+      <div class="control-group">
+        <label for="lambda">λ (Wavelength in Å)</label>
+        <input type="number" id="lambda" step="0.0001" value="1.5406">
+      </div>
+      <div class="control-group">
+        <label for="n">Order (n)</label>
+        <input type="number" id="n" min="1" max="3" value="1">
+      </div>
+      <div class="control-group">
+        <label for="hkl">Plane (hkl)</label>
+        <select id="hkl">
+          <option value="100">100</option>
+          <option value="110">110</option>
+          <option value="111">111</option>
+          <option value="220">220</option>
+          <option value="200">200</option>
+          <option value="211">211</option>
+          <option value="221">221</option>
+        </select>
+      </div>
+      <div class="output-box" id="output">
+        Calculations will appear here...
+      </div>
+    </div>
+    <div>
+      <canvas id="diagram" class="diagram-canvas" height="300"></canvas>
+      <canvas id="graph" height="200"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const thetaInput = document.getElementById("theta");
+    const dInput = document.getElementById("d");
+    const thetaVal = document.getElementById("theta-val");
+    const dVal = document.getElementById("d-val");
+    const lambdaInput = document.getElementById("lambda");
+    const nInput = document.getElementById("n");
+    const hklInput = document.getElementById("hkl");
+    const output = document.getElementById("output");
+    const aInput = document.getElementById("a");
+    const useAutoD = document.getElementById("use-auto-d");
+    const diagram = document.getElementById("diagram");
+    const ctx = diagram.getContext("2d");
+
+    const graphCtx = document.getElementById("graph").getContext("2d");
+    const intensityChart = new Chart(graphCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Intensity vs 2θ',
+          data: [],
+          borderColor: '#00ffcc',
+          backgroundColor: 'rgba(0, 255, 204, 0.2)',
+          tension: 0.3,
+        }]
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: '2θ (degrees)', color: '#fff' }, ticks: { color: '#fff' } },
+          y: { title: { display: true, text: 'Intensity', color: '#fff' }, ticks: { color: '#fff' } }
+        },
+        plugins: { legend: { labels: { color: '#fff' } } }
+      }
+    });
+
+    function updateSimulation() {
+      const theta = parseFloat(thetaInput.value);
+      const lambda = parseFloat(lambdaInput.value);
+      const n = parseInt(nInput.value);
+      const [h, k, l] = hklInput.value.split("").map(Number);
+      const a = parseFloat(aInput.value);
+
+      let d;
+      if (useAutoD.checked) {
+        d = a / Math.sqrt(h ** 2 + k ** 2 + l ** 2);
+        dInput.disabled = true;
+      } else {
+        d = parseFloat(dInput.value);
+        dInput.disabled = false;
+      }
+
+      thetaVal.textContent = `${theta}°`;
+      dVal.textContent = `${d.toFixed(3)} Å`;
+
+      const sinTheta = Math.sin((theta * Math.PI) / 180);
+      const lhs = n * lambda;
+      const rhs = 2 * d * sinTheta;
+      const satisfied = Math.abs(lhs - rhs) < 0.05;
+
+      output.innerText = `Bragg's Law:  nλ = 2d sinθ\n` +
+        `Check: ${lhs.toFixed(4)} ${satisfied ? '≈' : '≠'} ${rhs.toFixed(4)}\n` +
+        `Current d = ${d.toFixed(4)} Å\n` +
+        `Lattice constant a = ${a.toFixed(4)} Å`;
+
+      drawDiagram(theta, satisfied);
+      updateGraph(d, lambda, n);
+    }
+
+    function drawDiagram(theta, showDiffraction) {
+      ctx.clearRect(0, 0, diagram.width, diagram.height);
+      const w = diagram.width;
+      const h = diagram.height;
+
+      ctx.strokeStyle = '#888';
+      for (let y = 100; y < h; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = '#ffcc00';
+      ctx.beginPath();
+      ctx.moveTo(50, h / 2 - 100);
+      ctx.lineTo(w / 2, h / 2);
+      ctx.stroke();
+
+      if (showDiffraction) {
+        ctx.strokeStyle = '#00ffff';
+        ctx.beginPath();
+        ctx.moveTo(w / 2, h / 2);
+        ctx.lineTo(w - 50, h / 2 - 100);
+        ctx.stroke();
+      }
+    }
+
+    function updateGraph(d, lambda, n) {
+      const data = [];
+      const labels = [];
+
+      for (let t = 5; t <= 90; t += 1) {
+        const sinT = Math.sin((t * Math.PI) / 180);
+        const rhs = 2 * d * sinT;
+        const lhs = n * lambda;
+        const intensity = Math.exp(-Math.pow((rhs - lhs) * 10, 2));
+        data.push(intensity);
+        labels.push((2 * t).toFixed(1));
+      }
+
+      intensityChart.data.labels = labels;
+      intensityChart.data.datasets[0].data = data;
+      intensityChart.update();
+    }
+
+    [thetaInput, dInput, lambdaInput, nInput, hklInput, aInput, useAutoD].forEach(input => {
+      input.addEventListener("input", updateSimulation);
+    });
+
+    updateSimulation();
+  </script>
+</body>
+</html>
