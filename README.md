@@ -35,7 +35,7 @@ This is a web-based simulation of X-ray diffraction based on Bragg’s Law, buil
 
 1. Clone or download the repository:
    ```bash
-   git clone https://github.com/your-username/xrd-simulation.git
+   git clone https://github.com/khushimittal20/PHYSICS-XRD_SIMULATION.git
    ```
 2. Open index.html in browser.
 3. Use the control panel to change parameters. The ray diagram and graph will update in real-time.
