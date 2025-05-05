@@ -2,6 +2,9 @@
 
 This is a web-based simulation of X-ray diffraction based on Bragg’s Law, built using HTML, CSS, and JavaScript. It includes interactive controls and real-time visualization to help students understand the principles of diffraction in crystals.
 
+## Link:
+[PHYSICS-XRD_SIMULATION on GitHub](https://khushimittal20.github.io/PHYSICS-XRD_SIMULATION/)
+
 ## Features
 
 - Adjustable parameters:
@@ -39,6 +42,10 @@ This is a web-based simulation of X-ray diffraction based on Bragg’s Law, buil
    ```
 2. Open index.html in browser.
 3. Use the control panel to change parameters. The ray diagram and graph will update in real-time.
+
+## Images
+![image](https://github.com/user-attachments/assets/baa4464c-d30c-4b33-83ad-55b6a452f8f7)
+![image](https://github.com/user-attachments/assets/d26ba051-83f6-4355-8c80-96b2648f7388)
 
 ## Future Improvements
 
