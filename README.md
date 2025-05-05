@@ -36,3 +36,13 @@ This is a web-based simulation of X-ray diffraction based on Bragg’s Law, buil
 1. Clone or download the repository:
    ```bash
    git clone https://github.com/your-username/xrd-simulation.git
+   ```
+2. Open index.html in browser.
+3. Use the control panel to change parameters. The ray diagram and graph will update in real-time.
+
+## Future Improvements
+
+-Add support for different crystal types (SC, BCC, FCC)
+-Material presets (e.g., NaCl, Silicon)
+-Option to export data and graphs
+-3D visualization of crystal planes and diffraction
