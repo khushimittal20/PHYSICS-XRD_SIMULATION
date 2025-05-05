@@ -26,9 +26,9 @@ This is a web-based simulation of X-ray diffraction based on Bragg’s Law, buil
 
 ## Technologies Used
 
-- HTML5
-- CSS3 (Flexbox and Grid)
-- JavaScript (ES6+)
+- HTML
+- CSS
+- JavaScript 
 - Chart.js (for graph visualization)
 
 ## How to Use
@@ -42,7 +42,24 @@ This is a web-based simulation of X-ray diffraction based on Bragg’s Law, buil
 
 ## Future Improvements
 
--Add support for different crystal types (SC, BCC, FCC)
--Material presets (e.g., NaCl, Silicon)
--Option to export data and graphs
--3D visualization of crystal planes and diffraction
+- Add support for different crystal types (SC, BCC, FCC)
+- Material presets (e.g., NaCl, Silicon)
+- Option to export data and graphs
+- 3D visualization of crystal planes and diffraction
+
+## Contributions
+
+Contributions are welcome and appreciated!
+
+To contribute:
+
+1. **Fork** this repository.
+2. **Clone** your fork using.
+3. Create new branch:
+   ```bash
+   git checkout -b feature/your-feature-name
+4. Make the changes and commit:
+   ```bash
+   git commit -m "Add a short description"
+5. Push the changes.
+6. Open a Pull Request to the main repository with a clear title and description of your changes.
